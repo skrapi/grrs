@@ -1,3 +1,5 @@
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 use structopt::StructOpt;
 
 /// Search for a pattern in a file and display the lines that contain it.
@@ -15,4 +17,15 @@ fn main() {
 
     println!("The pattern to look for is \"{}\"", args.pattern);
     println!("The file is {:?}", args.path);
+
+    let file = File::open(&args.path).expect("could not read file");
+    let mut reader = BufReader::new(file);
+
+    let mut line = String::new();
+    while reader.buffer().is_empty() == false {
+        let _ = reader.read_line(&mut line).expect("error reading line");
+        if line.contains(&args.pattern) {
+            println!("{}", line);
+        }
+    }
 }
