@@ -12,20 +12,18 @@ struct Cli {
     path: std::path::PathBuf,
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Cli::from_args();
 
-    println!("The pattern to look for is \"{}\"", args.pattern);
-    println!("The file is {:?}", args.path);
+    let file = File::open(&args.path)?;
 
-    let file = File::open(&args.path).expect("could not read file");
-    let mut reader = BufReader::new(file);
+    let reader = BufReader::new(file);
 
-    let mut line = String::new();
-    while reader.buffer().is_empty() == false {
-        let _ = reader.read_line(&mut line).expect("error reading line");
+    for line in reader.lines() {
         if line.contains(&args.pattern) {
-            println!("{}", line);
+            println!("{}", line?);
         }
     }
+
+    Ok(())
 }
